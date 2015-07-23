@@ -1,0 +1,29 @@
+{
+    "name": "bsharp/larinterface",
+    "description": "Easy Interface generation for your Laravel project",
+    "keywords": ["laravel", "laravel5", "interface", "generator"],
+    "homepage": "https://github.com/bsharp/larinterface",
+    "authors": [
+        {
+            "name": "Nicolas Beauvais",
+            "email": "nicolasbeauvais1@gmail.com"
+        }
+    ],
+    "license": "MIT",
+    "require": {
+        "php": ">=5.4.0",
+        "illuminate/support": "5.1.*"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "~4.0"
+    },
+    "autoload": {
+        "classmap": [
+        ],
+        "psr-4": {
+            "Bsharp\\Larinterface\\": "src/",
+            "App\\": "publish/Eloquent/"
+        }
+    },
+    "minimum-stability": "stable"
+}
