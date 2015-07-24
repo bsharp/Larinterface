@@ -7,12 +7,22 @@
 
 ## Installation
 
+Larinterface is currently in alpha version for Laravel 5.*
+
+
 #### Composer
 
-To install Larinterface as a Composer package to be used with Laravel 5.*, simply add this line to your composer.json:
+To install Larinterface using composer, run this command:
 
 ```
-  "Bsharp/larinterface": "dev-master"
+    composer require bsharp/larinterface
+```
+
+If your minimum project stability is to high to use Larinterface in beta, add those two lines at the end of your composer.json:
+
+```
+    "minimum-stability": "dev",
+    "prefer-stable": true
 ```
 
 ### Publish
