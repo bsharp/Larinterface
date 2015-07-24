@@ -224,6 +224,7 @@ class Larinterface
 
         $interfacePath = $output . '/' . $arguments['className'] . '.php';
 
+        // Write Interface on disk using stubFile
         if ($this->filesystem->put($interfacePath, $stubFile) === false) {
             return [self::FAIL_WRITING, $interfacePath];
         }
