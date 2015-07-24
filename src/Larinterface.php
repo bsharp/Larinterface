@@ -15,6 +15,7 @@ class Larinterface
     const NOT_CLASS = 1;
     const EMPTY_CLASS = 2;
     const FAIL_WRITING = 3;
+    const NO_MODIFICATION = 4;
 
     /**
      * @var array
@@ -164,6 +165,19 @@ class Larinterface
             $output = app_path(substr($output, strpos($output, '/') + 1, strlen($output)));
         }
 
+        // Make output Interface path
+        $interfacePath = $output . '/' . $arguments['className'] . '.php';
+
+        // Check Class and Interface last updated timestamp
+        if (file_exists($interfacePath)) {
+            $updateClass = $this->filesystem->lastModified($reflectedClass->getFileName());
+            $updateInterface = $this->filesystem->lastModified($interfacePath);
+
+            if ($updateClass < $updateInterface) {
+                return self::NO_MODIFICATION;
+            }
+        }
+
         // Get methods and properties
         $methods = $reflectedClass->getMethods(ReflectionMethod::IS_PUBLIC);
         $properties = [];
@@ -221,8 +235,6 @@ class Larinterface
         foreach ($arguments as $key => $argument) {
             $stubFile = str_replace('%' . $key . '%', $argument, $stubFile);
         }
-
-        $interfacePath = $output . '/' . $arguments['className'] . '.php';
 
         // Write Interface on disk using stubFile
         if ($this->filesystem->put($interfacePath, $stubFile) === false) {

@@ -72,6 +72,8 @@ class LarinterfaceCommand extends Command
                 } elseif ($code === Larinterface::NOT_CLASS) {
 
                     $this->comment('[IGNORED] ' . $class);
+                } elseif ($code === Larinterface::NO_MODIFICATION) {
+                    // Do nothing
                 } else {
 
                     $this->error('[ERROR]   Can\'t write file: ' . $result[1]);
