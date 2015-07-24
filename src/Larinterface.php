@@ -166,9 +166,10 @@ class Larinterface
 
         // Get methods and properties
         $methods = $reflectedClass->getMethods(ReflectionMethod::IS_PUBLIC);
-        //$properties = $reflectedClass->getProperties(ReflectionProperty::IS_PUBLIC);
         $properties = [];
+        //$properties = $reflectedClass->getProperties(ReflectionProperty::IS_PUBLIC);
 
+        $missingCommentBlock = 0;
         $arguments['methods'] = '';
         $arguments['properties'] = '';
 
@@ -193,11 +194,16 @@ class Larinterface
             $method = implode('', array_slice($classFile, $start - 1, $end - $start + 1));
             $method = substr($method, 0, strpos($method, '{'));
 
-            $arguments['methods'] .= $comment . "\n    " . trim($method) . ";\n\n    ";
+            if (empty($comment)) {
+                $missingCommentBlock++;
+                $arguments['methods'] .= trim($method) . ";\n\n    ";
+            } else {
+                $arguments['methods'] .= $comment . "\n    " . trim($method) . ";\n\n    ";
+            }
         }
 
         // Trim end of methods string
-        rtrim($arguments['methods']);
+        $arguments['methods'] = rtrim($arguments['methods']);
 
         // @TODO: Parse properties
 
@@ -222,6 +228,6 @@ class Larinterface
             return [self::FAIL_WRITING, $interfacePath];
         }
 
-        return self::SUCCESS;
+        return [self::SUCCESS, $missingCommentBlock];
     }
 }

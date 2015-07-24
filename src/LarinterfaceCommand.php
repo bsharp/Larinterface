@@ -58,16 +58,23 @@ class LarinterfaceCommand extends Command
 
                 if ($code === Larinterface::SUCCESS) {
 
-                    $this->info($class . '\'s Interface created with success');
+                    $msg = '[SUCCESS] ' . $class;
+
+                    if ($result[1] > 0) {
+                        $msg .= ' [MISSING: ' . $result[1] . ' comment block]';
+                    }
+
+                    $this->info($msg);
+
                 } elseif ($code === Larinterface::EMPTY_CLASS) {
 
                     $this->comment('No method in class ' . $class . ' to generate an Interface');
                 } elseif ($code === Larinterface::NOT_CLASS) {
 
-                    $this->comment($class . ' ignored (is an Interface or a Trait)');
+                    $this->comment('[IGNORED] ' . $class);
                 } else {
 
-                    $this->error('An error occurred while writing on disk the Interface: ' . $result[1]);
+                    $this->error('[ERROR]   Can\'t write file: ' . $result[1]);
                 }
             }
         }
