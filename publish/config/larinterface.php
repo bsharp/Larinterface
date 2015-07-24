@@ -64,6 +64,8 @@ return [
     | %className%  : The Interface ClassName
     | %properties% : The Interface properties
     | %methods%    : The Interface methods
+    | %datetime%   : Datetime (Y-m-d H:i:s) of the interface creation
+    |
     |
     */
 

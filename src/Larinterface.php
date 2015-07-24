@@ -206,6 +206,9 @@ class Larinterface
             $this->filesystem->makeDirectory($output, 0755, true);
         }
 
+        // Add arguments for stubFile
+        $arguments['datetime'] =  date('Y-m-d H:i:s');
+
         // Fill stubFile in memory
         $stubFile = file_get_contents(config('larinterface.stubFile'));
 

@@ -3,8 +3,10 @@
 namespace %namespace%;
 
 /**
- * Class JobTitleRepository
+ * Class %className%
  * @package %namespace%
+ *
+ * Generated: %datetime%
  */
 interface %className%
 {
