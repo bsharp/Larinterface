@@ -6,11 +6,8 @@ php:
 matrix:
   allow_failures:
   - php: hhvm
-sudo: true
-before_install:
-- travis_retry composer self-update
-install:
-- travis_retry composer install --no-interaction --prefer-source
+before_script:
+- composer install --no-interaction
 script:
 - vendor/bin/phpunit --verbose --coverage-text
 notifications:
