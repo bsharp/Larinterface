@@ -63,7 +63,6 @@ class LarinterfaceCommand extends Command
                     }
 
                     $this->info($msg);
-
                 } elseif ($code === Larinterface::EMPTY_CLASS) {
                     $this->comment('No method in class ' . $class . ' to generate an Interface');
                 } elseif ($code === Larinterface::NOT_CLASS) {
