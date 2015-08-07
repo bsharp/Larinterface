@@ -58,7 +58,6 @@ class Larinterface
 
         // Forge classes
         foreach ($conf_classes as $output => $classes) {
-
             if (is_numeric($output)) {
                 $output = 0;
             }
@@ -76,7 +75,6 @@ class Larinterface
 
         // Forge directories
         foreach ($conf_directories as $output => $directories) {
-
             if (is_numeric($output)) {
                 $output = 0;
             }
@@ -86,7 +84,6 @@ class Larinterface
             }
 
             foreach ($directories as $directory) {
-
                 $classes = $this->classFinder->findClasses($directory);
 
                 if (isset($this->classes[$output])) {
@@ -102,10 +99,9 @@ class Larinterface
 
             // Ignore files
             foreach ($conf_ignore as $class) {
-
                 $classKey = array_search($class, $value);
 
-                if($classKey !== false) {
+                if ($classKey !== false) {
                     unset($value[$classKey]);
                 }
             }
