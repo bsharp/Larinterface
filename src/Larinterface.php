@@ -207,7 +207,6 @@ class Larinterface
             $methodDeclaration = '';
 
             foreach ($tokenized as $token) {
-
                 if (is_string($token) && $token === '{') {
                     break;
                 }
