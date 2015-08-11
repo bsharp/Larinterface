@@ -1,6 +1,7 @@
 # Larinterface
 
 [![Build Status](https://travis-ci.org/bsharp/Larinterface.svg)](https://travis-ci.org/bsharp/Larinterface)
+[![StyleCI](https://styleci.io/repos/39567681/shield)](https://styleci.io/repos/39567681)
 [![Latest Stable Version](https://poser.pugx.org/bsharp/larinterface/v/stable)](https://packagist.org/packages/bsharp/larinterface)
 [![Total Downloads](https://poser.pugx.org/bsharp/larinterface/downloads)](https://packagist.org/packages/bsharp/larinterface)
 [![License](https://poser.pugx.org/bsharp/larinterface/license)](https://packagist.org/packages/bsharp/larinterface)
