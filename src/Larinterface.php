@@ -2,6 +2,7 @@
 
 use Illuminate\Filesystem\ClassFinder;
 use Illuminate\Filesystem\Filesystem;
+use App;
 use ReflectionClass;
 use ReflectionMethod;
 
@@ -120,18 +121,11 @@ class Larinterface
      */
     public function generate($class, $output = null)
     {
-        $reflectedClass = new ReflectionClass($class);
-
-        // Check if it's not already an interface
-        if ($reflectedClass->isInterface() || $reflectedClass->isTrait()) {
-            return self::NOT_CLASS;
-        }
-
         // StubFile Arguments
         $arguments = [];
 
-        // Parse Class Name
-        $arguments['className'] = class_basename($reflectedClass->getName());
+        // Compose the Interface Class Name
+        $arguments['className'] = class_basename($class);
 
         $classNameType = config('larinterface.declaration');
 
@@ -141,9 +135,11 @@ class Larinterface
             $arguments['className'] .= 'Interface';
         }
 
-        // Parse Interface namespace
+        // Parse Interface namespace and class output
         if ($output == null) {
-            $arguments['namespace'] = $reflectedClass->getNamespaceName();
+            $arguments['namespace'] = substr($class, 0, strrpos($class, '\\'));
+            $path = str_replace('\\', '/', str_replace(class_basename($class), '', $class));
+            $output = substr($path, 0, strlen($path) - 1);
         } else {
             $arrayPath = explode('/', $output);
 
@@ -154,20 +150,65 @@ class Larinterface
             $arguments['namespace'] = implode('\\', $arrayPath);
         }
 
-        // Parse class output
-        if ($output == null) {
-            $output = dirname($reflectedClass->getFileName());
-        } else {
-            $output = app_path(substr($output, strpos($output, '/') + 1, strlen($output)));
-        }
+        $output = app_path(substr($output, strpos($output, '/') + 1, strlen($output)));
 
         // Make output Interface path
         $interfacePath = $output . '/' . $arguments['className'] . '.php';
 
+        $updateInterface = 0;
+
+        /**
+         * At this point the class should perfectly implements the interface to avoid a fatal error.
+         *
+         * Possible workaround:
+         * - Empty the interface to avoid any possible missmatch (dirtiest)(actual)
+         * - Find a way to get the class tokenized definition and analyse it to empty just the right interface method
+         * - Find a way to use ReflectionClass on a class with a not compatible Interface
+         */
+
+        // if the interface already exist we empty it
+        if (file_exists($interfacePath)) {
+
+            $interfaceContent = file_get_contents($interfacePath);
+
+            $tokenized = token_get_all($interfaceContent);
+            $interfaceContentEmpty = '';
+
+            foreach ($tokenized as $token) {
+
+                if (is_string($token) && $token === '{') {
+                    break;
+                }
+
+                if (is_array($token)) {
+                    $interfaceContentEmpty .= $token[1];
+                } else {
+                    $interfaceContentEmpty .= $token;
+                }
+            }
+
+            $interfaceContentEmpty .= '{}';
+
+            // Get last modification date on class on interface
+            $updateInterface = $this->filesystem->lastModified($interfacePath);
+
+            // Empty Interface
+            $this->filesystem->put($interfacePath, $interfaceContentEmpty);
+
+        } else {
+            // Create a empty namespaced interface
+        }
+
+        $reflectedClass = new ReflectionClass($class);
+
+        // Check if it's not already an interface
+        if ($reflectedClass->isInterface() || $reflectedClass->isTrait()) {
+            return self::NOT_CLASS;
+        }
+
         // Check Class and Interface last updated timestamp
         if (file_exists($interfacePath)) {
             $updateClass = $this->filesystem->lastModified($reflectedClass->getFileName());
-            $updateInterface = $this->filesystem->lastModified($interfacePath);
 
             if ($updateClass < $updateInterface) {
                 return self::NO_MODIFICATION;
