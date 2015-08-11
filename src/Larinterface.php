@@ -168,14 +168,12 @@ class Larinterface
 
         // if the interface already exist we empty it
         if (file_exists($interfacePath)) {
-
             $interfaceContent = file_get_contents($interfacePath);
 
             $tokenized = token_get_all($interfaceContent);
             $interfaceContentEmpty = '';
 
             foreach ($tokenized as $token) {
-
                 if (is_string($token) && $token === '{') {
                     break;
                 }
@@ -194,7 +192,6 @@ class Larinterface
 
             // Empty Interface
             $this->filesystem->put($interfacePath, $interfaceContentEmpty);
-
         } else {
             // Create a empty namespaced interface
         }
