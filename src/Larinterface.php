@@ -202,13 +202,30 @@ class Larinterface
 
             $comment = $reflectionMethod->getDocComment();
             $method = implode('', array_slice($classFile, $start - 1, $end - $start + 1));
-            $method = substr($method, 0, strpos($method, '{'));
+
+            $tokenized = token_get_all('<?php ' . $method);
+            $methodDeclaration = '';
+
+            foreach ($tokenized as $token) {
+
+                if (is_string($token) && $token === '{') {
+                    break;
+                }
+
+                if (is_array($token)) {
+                    $methodDeclaration .= $token[1];
+                } else {
+                    $methodDeclaration .= $token;
+                }
+            }
+
+            $methodDeclaration = str_replace('<?php ', '', $methodDeclaration);
 
             if (empty($comment)) {
                 $missingCommentBlock++;
-                $arguments['methods'] .= trim($method) . ";\n\n    ";
+                $arguments['methods'] .= trim($methodDeclaration) . ";\n\n    ";
             } else {
-                $arguments['methods'] .= $comment . "\n    " . trim($method) . ";\n\n    ";
+                $arguments['methods'] .= $comment . "\n    " . trim($methodDeclaration) . ";\n\n    ";
             }
         }
 
