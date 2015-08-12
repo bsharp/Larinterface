@@ -66,6 +66,8 @@ class Larinterface
         $conf_directories = config('larinterface.directories');
         $conf_ignore = config('larinterface.ignore');
 
+        $classesArray = [];
+
         // Forge classes
         foreach ($conf_classes as $output => $classes) {
             if (is_numeric($output)) {
@@ -76,10 +78,10 @@ class Larinterface
                 $classes = [$classes];
             }
 
-            if (isset($this->classes[$output])) {
-                $this->classes[$output] = array_merge($this->classes[$output], $classes);
+            if (isset($classesArray[$output])) {
+                $classesArray[$output] = array_merge($classesArray[$output], $classes);
             } else {
-                $this->classes[$output] = $classes;
+                $classesArray[$output] = $classes;
             }
         }
 
@@ -96,16 +98,16 @@ class Larinterface
             foreach ($directories as $directory) {
                 $classes = $this->classFinder->findClasses($directory);
 
-                if (isset($this->classes[$output])) {
-                    $this->classes[$output] = array_merge($this->classes[$output], $classes);
+                if (isset($classesArray[$output])) {
+                    $classesArray[$output] = array_merge($classesArray[$output], $classes);
                 } else {
-                    $this->classes[$output] = $classes;
+                    $classesArray[$output] = $classes;
                 }
             }
         }
 
         // Clean forged class
-        foreach ($this->classes as $key => $value) {
+        foreach ($classesArray as $key => $value) {
 
             // Ignore files
             foreach ($conf_ignore as $class) {
@@ -116,52 +118,90 @@ class Larinterface
                 }
             }
 
-            $this->classes[$key] = array_unique($value);
+            $classesArray[$key] = array_unique($value);
         }
 
-        return $this->classes;
+        return $this->extractInterfacePathFromClasses($classesArray);
     }
 
     /**
      * Transform the simple class map array by adding more info in it.
      *
+     * @param array $classesArray
+     *
+     * @return array
+     */
+    protected function extractInterfacePathFromClasses(array $classesArray)
+    {
+        $extracted = [];
+
+        foreach ($classesArray as $output => $classes) {
+
+            foreach ($classes as $class) {
+
+                // Forge output if it doesn't exist yet
+                if ($output == null) {
+
+                    // Namespace to file path
+                    $path = str_replace('\\', '/', str_replace(class_basename($class), '', $class));
+                    // Remove trailing "/"
+                    $output = substr($path, 0, strlen($path) - 1);
+                }
+
+                // Use app_path to get the correct first dir (eg: app instead of App)
+                $classOutput = app_path(substr($output, strpos($output, '/') + 1, strlen($output)));
+
+                // Get namespace of the interface to generate
+                $namespace = explode('/', $output);
+
+                foreach ($namespace as &$chunk) {
+                    $chunk = ucfirst($chunk);
+                }
+
+                $namespace = implode('\\', $namespace);
+
+                // Get class name
+                $classNameType = config('larinterface.declaration');
+                $className = class_basename($class);
+
+                if ($classNameType === 'before') {
+                    $className = 'Interface' . $className;
+                } elseif ($classNameType === 'after') {
+                    $className .= 'Interface';
+                }
+
+                $extracted[$class] = [
+                    'output' => $classOutput,
+                    'output_file' => $classOutput . '/' . $className . '.php',
+                    'namespace' => $namespace,
+                    'name' => $className
+                ];
+            }
+        }
+
+        return $extracted;
+    }
+
+    /**
+     * Generate an interface for the given class and output.
+     *
+     * @param $class
+     * @param null $output
+     * @param $outputFile
+     * @param $namespace
+     * @param $interfaceName
+     *
      * @return null
      */
-    public function generate($class, $output = null)
+    public function generate($class, $output, $outputFile, $namespace, $interfaceName)
     {
+
         // StubFile Arguments
         $arguments = [];
 
         // Compose the Interface Class Name
-        $arguments['className'] = class_basename($class);
-
-        $classNameType = config('larinterface.declaration');
-
-        if ($classNameType === 'before') {
-            $arguments['className'] = 'Interface' . $arguments['className'];
-        } elseif ($classNameType === 'after') {
-            $arguments['className'] .= 'Interface';
-        }
-
-        // Parse Interface namespace and class output
-        if ($output == null) {
-            $arguments['namespace'] = substr($class, 0, strrpos($class, '\\'));
-            $path = str_replace('\\', '/', str_replace(class_basename($class), '', $class));
-            $output = substr($path, 0, strlen($path) - 1);
-        } else {
-            $arrayPath = explode('/', $output);
-
-            foreach ($arrayPath as $key => $directory) {
-                $arrayPath[$key] = ucfirst($directory);
-            }
-
-            $arguments['namespace'] = implode('\\', $arrayPath);
-        }
-
-        $output = app_path(substr($output, strpos($output, '/') + 1, strlen($output)));
-
-        // Make output Interface path
-        $interfacePath = $output . '/' . $arguments['className'] . '.php';
+        $arguments['className'] = $interfaceName;
+        $arguments['namespace'] = $namespace;
 
         $updateInterface = 0;
 
@@ -175,8 +215,8 @@ class Larinterface
          */
 
         // if the interface already exist we empty it
-        if (file_exists($interfacePath)) {
-            $interfaceContent = file_get_contents($interfacePath);
+        if (file_exists($outputFile)) {
+            $interfaceContent = file_get_contents($outputFile);
 
             $tokenized = token_get_all($interfaceContent);
             $interfaceContentEmpty = '';
@@ -196,23 +236,23 @@ class Larinterface
             $interfaceContentEmpty .= '{}';
 
             // Get last modification date on class on interface
-            $updateInterface = $this->filesystem->lastModified($interfacePath);
+            $updateInterface = $this->filesystem->lastModified($outputFile);
 
             // Empty Interface
-            $this->filesystem->put($interfacePath, $interfaceContentEmpty);
+            $this->filesystem->put($outputFile, $interfaceContentEmpty);
         } else {
-            // Create a empty namespaced interface
+            // @TODO: Create a empty interface (with correct name and namespace)
         }
 
         $reflectedClass = new ReflectionClass($class);
 
-        // Check if it's not already an interface
+        // Check if it's already an interface
         if ($reflectedClass->isInterface() || $reflectedClass->isTrait()) {
             return self::NOT_CLASS;
         }
 
         // Check Class and Interface last updated timestamp
-        if (file_exists($interfacePath)) {
+        if (file_exists($outputFile)) {
             $updateClass = $this->filesystem->lastModified($reflectedClass->getFileName());
 
             if ($updateClass < $updateInterface) {
@@ -295,8 +335,8 @@ class Larinterface
         }
 
         // Write Interface on disk using stubFile
-        if ($this->filesystem->put($interfacePath, $stubFile) === false) {
-            return [self::FAIL_WRITING, $interfacePath];
+        if ($this->filesystem->put($outputFile, $stubFile) === false) {
+            return [self::FAIL_WRITING, $outputFile];
         }
 
         return [self::SUCCESS, $missingCommentBlock];
