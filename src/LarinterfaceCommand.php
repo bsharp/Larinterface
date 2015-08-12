@@ -50,7 +50,6 @@ class LarinterfaceCommand extends Command
         $classes = $this->larinterface->getClasses();
 
         foreach ($classes as $class => $output) {
-
             $result = $this->larinterface->generate(
                 $class,
                 $output['output'],
@@ -77,7 +76,7 @@ class LarinterfaceCommand extends Command
                 // Do nothing
             } else {
                 $this->error('[ERROR]   Can\'t write file: ' . $result[1]);
-                }
+            }
         }
     }
 }

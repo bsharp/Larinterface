@@ -136,7 +136,6 @@ class Larinterface
         $extracted = [];
 
         foreach ($classesArray as $output => $classes) {
-
             foreach ($classes as $class) {
 
                 // Forge output if it doesn't exist yet
