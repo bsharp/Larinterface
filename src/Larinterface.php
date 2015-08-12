@@ -12,14 +12,23 @@ use ReflectionMethod;
  */
 class Larinterface
 {
+    // Returned by the generate method in case of success.
     const SUCCESS = 0;
+
+    // Returned by the generate method if the given class is a Trait or an Interface.
     const NOT_CLASS = 1;
+
+    // Returned by the generate method if the class as no public method.
     const EMPTY_CLASS = 2;
+
+    // Returned by the generate method if it can't write the Interface file.
     const FAIL_WRITING = 3;
+
+    // Returned by the generate method if the Interface have a younger timestamp than the class.
     const NO_MODIFICATION = 4;
 
     /**
-     * @var array
+     * @var array contain classes list with interface's to be generated path.
      */
     private $classes = [];
 
@@ -46,7 +55,7 @@ class Larinterface
     }
 
     /**
-     * Parse config file to get all classes to extract.
+     * Parse config file and project to get all classes to extract.
      *
      *
      * @return array
@@ -114,8 +123,7 @@ class Larinterface
     }
 
     /**
-     * @param $class
-     * @param null $output
+     * Transform the simple class map array by adding more info in it.
      *
      * @return null
      */
