@@ -15,7 +15,7 @@ class LarinterfaceCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'larinterface:make';
+    protected $signature = 'larinterface:generate';
 
     /**
      * The console command description.

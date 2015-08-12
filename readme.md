@@ -43,7 +43,7 @@ Open the generated `config/larinterface.php` file and change the configuration t
 Now Larinterface should work using the command:
 
 ```
-  php artisan larinterface:make
+  php artisan larinterface:generate
 ```
 
 But executing this command each time after modifying one of your PHP Class is annoying.
@@ -70,7 +70,7 @@ You can create a gulp watcher to do that for you, add this lines to your gulpfil
 
     locked = true;
 
-    return gulp.src('').pipe(exec('php artisan larinterface:make'))
+    return gulp.src('').pipe(exec('php artisan larinterface:generate'))
         .pipe(exec.reporter({}))
         .on('end', function () {
             setTimeout(function () {
