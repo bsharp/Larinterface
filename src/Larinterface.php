@@ -188,6 +188,22 @@ class Larinterface
     }
 
     /**
+     * Store classes list in cache directory ot be used by gulp.
+     */
+    public function store()
+    {
+        $classes = [];
+
+        foreach ($this->classes as $class) {
+            $classes[] = $class['input_file'];
+        }
+
+        $json_classes = json_encode($classes);
+
+        $this->filesystem->put(storage_path('app/larinterface.json'), $json_classes);
+    }
+
+    /**
      * Generate an interface for the given class and output.
      *
      * @param $class

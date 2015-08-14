@@ -50,18 +50,9 @@ class LarinterfaceGenerateCommand extends Command
     {
         $classes = $this->larinterface->getClasses();
 
-        foreach ($classes as $class => $output) {
+        $this->larinterface->store();
 
-            /*
-            $this->larinterface->generate(
-                $class,
-                $output['output'],
-                $output['output_file'],
-                $output['input_file'],
-                $output['namespace'],
-                $output['name']
-            );
-            */
+        foreach ($classes as $class => $output) {
 
             $args = [
                 $class,
@@ -98,7 +89,7 @@ class LarinterfaceGenerateCommand extends Command
             if ($code === Larinterface::SUCCESS) {
                 $msg = '[SUCCESS]     ' . $class;
 
-                if ($result[1] > 0) {
+                if ((int)$result[1] > 0) {
                     $msg .= ' [MISSING: ' . $result[1] . ' comment block]';
                 }
 

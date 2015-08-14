@@ -46,8 +46,10 @@ Now Larinterface should work using the command:
   php artisan larinterface:generate
 ```
 
+### File watcher
+
 But executing this command each time after modifying one of your PHP Class is annoying.
-You can create a gulp watcher to do that for you, add this lines to your gulpfile:
+You can create a gulp watcher, using elixir 3, to do that for you. Add this lines to your gulpfile:
 
 ```javascript
 
@@ -55,10 +57,7 @@ You can create a gulp watcher to do that for you, add this lines to your gulpfil
     var exec = require('gulp-exec');
     var Task = elixir.Task;
     
-    var files = [
-        'app/Models/Repositories/*.php'
-    ];
-    
+    var files = require('./storage/app/larinterface.json');
     var locked = false;
     
     elixir.extend('larinterface', function() {
@@ -66,7 +65,7 @@ You can create a gulp watcher to do that for you, add this lines to your gulpfil
       new Task('larinterface_generate', function () {
     
         if(locked === true) {
-            return;
+          return;
         }
     
         locked = true;
@@ -75,6 +74,7 @@ You can create a gulp watcher to do that for you, add this lines to your gulpfil
         task.on('end', function () {
           setTimeout(function () {
             locked = false;
+            files = require('./storage/app/larinterface.json');
           }, 1000);
         });
     
