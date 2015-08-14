@@ -53,7 +53,6 @@ class LarinterfaceGenerateCommand extends Command
         $this->larinterface->store();
 
         foreach ($classes as $class => $output) {
-
             $args = [
                 $class,
                 $output['output'],
