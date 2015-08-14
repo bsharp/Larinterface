@@ -5,10 +5,10 @@ namespace Bsharp\Larinterface;
 use Illuminate\Console\Command;
 
 /**
- * Class LarinterfaceCommand
+ * Class LarinterfaceGenerateCommand
  * @package Bsharp\Larinterface
  */
-class LarinterfaceCommand extends Command
+class LarinterfaceGenerateCommand extends Command
 {
     /**
      * The name and signature of the console command.
@@ -23,6 +23,7 @@ class LarinterfaceCommand extends Command
      * @var string
      */
     protected $description = 'Create Interface from PHP classes.';
+
     /**
      * @var Larinterface
      */
@@ -50,7 +51,9 @@ class LarinterfaceCommand extends Command
         $classes = $this->larinterface->getClasses();
 
         foreach ($classes as $class => $output) {
-            $result = $this->larinterface->generate(
+
+            /*
+            $this->larinterface->generate(
                 $class,
                 $output['output'],
                 $output['output_file'],
@@ -58,11 +61,42 @@ class LarinterfaceCommand extends Command
                 $output['namespace'],
                 $output['name']
             );
+            */
 
-            $code = is_array($result) ? $result[0] : $result;
+            $args = [
+                $class,
+                $output['output'],
+                $output['output_file'],
+                $output['input_file'],
+                $output['namespace'],
+                $output['name']
+            ];
+
+            // Just in case
+            $cli_args = '';
+            foreach ($args as $arg) {
+                $cli_args .= '"' . $arg . '" ';
+            }
+
+            $handle = popen('php artisan larinterface:encapsulate ' . $cli_args . ' 2>&1', 'r');
+
+            $result = fread($handle, 2096);
+            $result = explode("\n", $result);
+
+            array_pop($result);
+
+            pclose($handle);
+
+            if (count($result) === 1) {
+                $result = $result[0];
+            } elseif (str_contains(strtolower($result[0]), 'php parse error')) { // In case of PHP parse error
+                $result = Larinterface::PARSE_ERROR;
+            }
+
+            $code = is_array($result) ? (int)$result[0] : (int)$result;
 
             if ($code === Larinterface::SUCCESS) {
-                $msg = '[SUCCESS] ' . $class;
+                $msg = '[SUCCESS]     ' . $class;
 
                 if ($result[1] > 0) {
                     $msg .= ' [MISSING: ' . $result[1] . ' comment block]';
@@ -72,11 +106,13 @@ class LarinterfaceCommand extends Command
             } elseif ($code === Larinterface::EMPTY_CLASS) {
                 $this->comment('No method in class ' . $class . ' to generate an Interface');
             } elseif ($code === Larinterface::NOT_CLASS) {
-                $this->comment('[IGNORED] ' . $class);
+                $this->comment('[IGNORED]     ' . $class);
             } elseif ($code === Larinterface::NO_MODIFICATION) {
-                $this->info('[UPTODATE] ' . $class);
+                $this->info('[UP TO DATE]  ' . $class);
+            } elseif ($code === Larinterface::PARSE_ERROR) {
+                $this->error('[PARSE ERROR] ' . $class);
             } else {
-                $this->error('[ERROR]   Can\'t write file: ' . $result[1]);
+                $this->error('[ERROR]       Can\'t write file: ' . $result[1]);
             }
         }
     }

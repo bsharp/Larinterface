@@ -27,6 +27,9 @@ class Larinterface
     // Returned by the generate method if the Interface have a younger timestamp than the class.
     const NO_MODIFICATION = 4;
 
+    // Code used in case of parse error.
+    const PARSE_ERROR = 5;
+
     /**
      * @var array contain classes list with interface's to be generated path.
      */

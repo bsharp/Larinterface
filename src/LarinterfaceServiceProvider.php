@@ -18,6 +18,7 @@ class LarinterfaceServiceProvider extends ServiceProvider
         ], 'config');
 
         // Register command
-        $this->commands([LarinterfaceCommand::class]);
+        $this->commands([LarinterfaceGenerateCommand::class]);
+        $this->commands([LarinterfaceEncapsulateCommand::class]);
     }
 }
