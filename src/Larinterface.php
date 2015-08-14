@@ -121,7 +121,7 @@ class Larinterface
             $classesArray[$key] = array_unique($value);
         }
 
-        return $this->extractInterfacePathFromClasses($classesArray);
+        return $this->classes = $this->extractInterfacePathFromClasses($classesArray);
     }
 
     /**
@@ -138,17 +138,19 @@ class Larinterface
         foreach ($classesArray as $output => $classes) {
             foreach ($classes as $class) {
 
-                // Forge output if it doesn't exist yet
-                if ($output == null) {
+                // Namespace to file path
+                $path = str_replace('\\', '/', str_replace(class_basename($class), '', $class));
 
-                    // Namespace to file path
-                    $path = str_replace('\\', '/', str_replace(class_basename($class), '', $class));
-                    // Remove trailing "/"
-                    $output = substr($path, 0, strlen($path) - 1);
-                }
+                // Remove trailing "/"
+                $input = substr($path, 0, strlen($path) - 1);
+
+                // Forge output if it doesn't exist yet
+                $output = is_null($output) ? $input : $output;
 
                 // Use app_path to get the correct first dir (eg: app instead of App)
                 $classOutput = app_path(substr($output, strpos($output, '/') + 1, strlen($output)));
+                $input = app_path(substr($input, strpos($input, '/') + 1, strlen($input))) . '/' .
+                    class_basename($class) . '.php';
 
                 // Get namespace of the interface to generate
                 $namespace = explode('/', $output);
@@ -172,6 +174,7 @@ class Larinterface
                 $extracted[$class] = [
                     'output' => $classOutput,
                     'output_file' => $classOutput . '/' . $className . '.php',
+                    'input_file' => $input,
                     'namespace' => $namespace,
                     'name' => $className
                 ];
@@ -187,12 +190,13 @@ class Larinterface
      * @param $class
      * @param null $output
      * @param $outputFile
+     * @param $input_file
      * @param $namespace
      * @param $interfaceName
      *
      * @return null
      */
-    public function generate($class, $output, $outputFile, $namespace, $interfaceName)
+    public function generate($class, $output, $outputFile, $input_file, $namespace, $interfaceName)
     {
 
         // StubFile Arguments
@@ -202,7 +206,15 @@ class Larinterface
         $arguments['className'] = $interfaceName;
         $arguments['namespace'] = $namespace;
 
-        $updateInterface = 0;
+        // Store current datetime
+        $arguments['datetime'] =  date('Y-m-d H:i:s');
+
+        // Initialise methods and properties
+        $arguments['methods'] = '';
+        $arguments['properties'] = '';
+
+        // Fill stubFile in memory
+        $stubFile = file_get_contents(config('larinterface.stubFile'));
 
         /**
          * At this point the class should perfectly implements the interface to avoid a fatal error.
@@ -234,14 +246,52 @@ class Larinterface
 
             $interfaceContentEmpty .= '{}';
 
-            // Get last modification date on class on interface
+            // Get last modification datetime of the class interface
             $updateInterface = $this->filesystem->lastModified($outputFile);
+            // Get last modification datetime of the class
+            $updateClass = $this->filesystem->lastModified($input_file);
+
+            // Save old content
+            $outputOldContent = $this->filesystem->get($outputFile);
 
             // Empty Interface
             $this->filesystem->put($outputFile, $interfaceContentEmpty);
+
+            // Check if update is needed
+            if ($updateClass < $updateInterface) {
+
+                // if not Refill the interface
+                if (isset($outputOldContent)) {
+                    $this->filesystem->put($outputFile, $outputOldContent);
+                }
+
+                return self::NO_MODIFICATION;
+            }
         } else {
-            // @TODO: Create a empty interface (with correct name and namespace)
+
+            // Create output directory if needed
+            if (!file_exists($output)) {
+                $this->filesystem->makeDirectory($output, 0755, true);
+            }
+
+            $scratchStub = $stubFile;
+
+            // Add arguments to the scratch stubFile
+            foreach ($arguments as $key => $argument) {
+                $scratchStub = str_replace('%' . $key . '%', $argument, $scratchStub);
+            }
+
+            // Write the Interface on disk
+            if ($this->filesystem->put($outputFile, $scratchStub) === false) {
+                return [self::FAIL_WRITING, $outputFile];
+            }
         }
+
+        /**
+         * At this point we are sure that the class have a valid interface, an empty
+         * one but it's just to use the reflection on the class without any error
+         * concerning difference between the class and the interface that it implement.
+         */
 
         $reflectedClass = new ReflectionClass($class);
 
@@ -250,23 +300,12 @@ class Larinterface
             return self::NOT_CLASS;
         }
 
-        // Check Class and Interface last updated timestamp
-        if (file_exists($outputFile)) {
-            $updateClass = $this->filesystem->lastModified($reflectedClass->getFileName());
-
-            if ($updateClass < $updateInterface) {
-                return self::NO_MODIFICATION;
-            }
-        }
-
         // Get methods and properties
         $methods = $reflectedClass->getMethods(ReflectionMethod::IS_PUBLIC);
         $properties = [];
         //$properties = $reflectedClass->getProperties(ReflectionProperty::IS_PUBLIC);
 
         $missingCommentBlock = 0;
-        $arguments['methods'] = '';
-        $arguments['properties'] = '';
 
         if (count($methods) == 0 && count($properties) == 0) {
             return null;
@@ -324,11 +363,6 @@ class Larinterface
         }
 
         // Add arguments for stubFile
-        $arguments['datetime'] =  date('Y-m-d H:i:s');
-
-        // Fill stubFile in memory
-        $stubFile = file_get_contents(config('larinterface.stubFile'));
-
         foreach ($arguments as $key => $argument) {
             $stubFile = str_replace('%' . $key . '%', $argument, $stubFile);
         }

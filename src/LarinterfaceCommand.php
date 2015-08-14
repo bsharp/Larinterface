@@ -54,6 +54,7 @@ class LarinterfaceCommand extends Command
                 $class,
                 $output['output'],
                 $output['output_file'],
+                $output['input_file'],
                 $output['namespace'],
                 $output['name']
             );
@@ -73,7 +74,7 @@ class LarinterfaceCommand extends Command
             } elseif ($code === Larinterface::NOT_CLASS) {
                 $this->comment('[IGNORED] ' . $class);
             } elseif ($code === Larinterface::NO_MODIFICATION) {
-                // Do nothing
+                $this->info('[UPTODATE] ' . $class);
             } else {
                 $this->error('[ERROR]   Can\'t write file: ' . $result[1]);
             }
