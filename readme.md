@@ -53,29 +53,35 @@ You can create a gulp watcher to do that for you, add this lines to your gulpfil
 
     var gulp = require('gulp');
     var exec = require('gulp-exec');
-
+    var Task = elixir.Task;
+    
     var files = [
         'app/Models/Repositories/*.php'
     ];
-
+    
     var locked = false;
-
-    gulp.watch(files, ['larinterface:start']);
-
-    gulp.task('larinterface:start', function () {
-
-    if (locked === true) {
-        return;
-    }
-
-    locked = true;
-
-    return gulp.src('').pipe(exec('php artisan larinterface:generate'))
-        .pipe(exec.reporter({}))
-        .on('end', function () {
-            setTimeout(function () {
-                locked = false;
-            }, 1000);
+    
+    elixir.extend('larinterface', function() {
+    
+      new Task('larinterface_generate', function () {
+    
+        if(locked === true) {
+            return;
+        }
+    
+        locked = true;
+    
+        var task = gulp.src('').pipe(exec('php artisan larinterface:generate'));
+        task.on('end', function () {
+          setTimeout(function () {
+            locked = false;
+          }, 1000);
         });
+    
+        return task.pipe(exec.reporter({}));
+      })
+      .watch(files);
     });
 ```
+
+You can now use `mix.larinterface();`
