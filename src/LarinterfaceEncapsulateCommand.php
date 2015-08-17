@@ -48,8 +48,6 @@ class LarinterfaceEncapsulateCommand extends Command
      */
     public function handle()
     {
-        // @TODO: do not echo can be array
-
         $return = $this->larinterface->generate(
             $this->argument('class'),
             $this->argument('output'),
@@ -59,12 +57,10 @@ class LarinterfaceEncapsulateCommand extends Command
             $this->argument('name')
         );
 
-        if (is_array($return)) {
-            foreach ($return as $line) {
-                echo $line . "\n";
-            }
-        } else {
-            echo $return . "\n";
+        if (!is_array($return)) {
+            $return = ['code' => $return];
         }
+
+        echo json_encode($return);
     }
 }

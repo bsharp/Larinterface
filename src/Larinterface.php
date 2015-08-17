@@ -302,7 +302,7 @@ class Larinterface
 
             // Write the Interface on disk
             if ($this->filesystem->put($outputFile, $scratchStub) === false) {
-                return [self::FAIL_WRITING, $outputFile];
+                return ['code' => self::FAIL_WRITING, 'output' => $outputFile];
             }
         }
 
@@ -327,7 +327,7 @@ class Larinterface
         $missingCommentBlock = 0;
 
         if (count($methods) == 0 && count($properties) == 0) {
-            return null;
+            return self::EMPTY_CLASS;
         }
 
         $classFile = file($reflectedClass->getFileName());
@@ -388,9 +388,9 @@ class Larinterface
 
         // Write Interface on disk using stubFile
         if ($this->filesystem->put($outputFile, $stubFile) === false) {
-            return [self::FAIL_WRITING, $outputFile];
+            return ['code' => self::FAIL_WRITING, 'output' => $outputFile];
         }
 
-        return [self::SUCCESS, $missingCommentBlock];
+        return ['code' => self::SUCCESS, 'comment' => $missingCommentBlock];
     }
 }

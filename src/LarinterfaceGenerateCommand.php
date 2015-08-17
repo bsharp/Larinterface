@@ -71,38 +71,32 @@ class LarinterfaceGenerateCommand extends Command
             $handle = popen('php artisan larinterface:encapsulate ' . $cli_args . ' 2>&1', 'r');
 
             $result = fread($handle, 2096);
-            $result = explode("\n", $result);
-
-            array_pop($result);
-
             pclose($handle);
 
-            if (count($result) === 1) {
-                $result = $result[0];
-            } elseif (str_contains(strtolower($result[0]), 'php parse error')) { // In case of PHP parse error
-                $result = Larinterface::PARSE_ERROR;
+            if (str_contains(strtolower($result), 'php parse error')) { // In case of PHP parse error
+                $result = json_encode(['code' => Larinterface::PARSE_ERROR]);
             }
 
-            $code = is_array($result) ? (int)$result[0] : (int)$result;
+            $result = json_decode(trim($result), true);
 
-            if ($code === Larinterface::SUCCESS) {
+            if ($result['code'] === Larinterface::SUCCESS) {
                 $msg = '[SUCCESS]     ' . $class;
 
-                if ((int)$result[1] > 0) {
-                    $msg .= ' [MISSING: ' . $result[1] . ' comment block]';
+                if ($result['comment'] > 0) {
+                    $msg .= ' [MISSING: ' . $result['comment'] . ' comment block]';
                 }
 
                 $this->info($msg);
-            } elseif ($code === Larinterface::EMPTY_CLASS) {
+            } elseif ($result['code'] === Larinterface::EMPTY_CLASS) {
                 $this->comment('No method in class ' . $class . ' to generate an Interface');
-            } elseif ($code === Larinterface::NOT_CLASS) {
+            } elseif ($result['code'] === Larinterface::NOT_CLASS) {
                 $this->comment('[IGNORED]     ' . $class);
-            } elseif ($code === Larinterface::NO_MODIFICATION) {
+            } elseif ($result['code'] === Larinterface::NO_MODIFICATION) {
                 $this->info('[UP TO DATE]  ' . $class);
-            } elseif ($code === Larinterface::PARSE_ERROR) {
+            } elseif ($result['code'] === Larinterface::PARSE_ERROR) {
                 $this->error('[PARSE ERROR] ' . $class);
             } else {
-                $this->error('[ERROR]       Can\'t write file: ' . $result[1]);
+                $this->error('[ERROR]       Can\'t write file: ' . $result['output']);
             }
         }
     }
