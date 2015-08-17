@@ -200,7 +200,7 @@ class Larinterface
 
         $json_classes = json_encode($classes);
 
-        $this->filesystem->put(storage_path('app/larinterface.json'), $json_classes);
+        $this->filesystem->put(config('larinterface.cache_directory') . '/larinterface.json', $json_classes);
     }
 
     /**
