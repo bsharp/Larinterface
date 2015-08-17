@@ -8,8 +8,8 @@ return [
     |--------------------------------------------------------------------------
     |
     | All class will have an interface generated in the specified directory
-    | (the array key). If the key is not set, the Interface will be created in
-    | the class directory.
+    | (the array key). If the key is not set, the Interface will be created
+    | in the class directory.
     |
     */
 
@@ -38,8 +38,8 @@ return [
     |--------------------------------------------------------------------------
     |
     | This list act as a blacklist of class that should not have an
-    | Interface generated but are included in the directories config array.
-    | Such as an Abstract class or config files.
+    | Interface generated but are included in the directories config
+    | array. Such as an Abstract class or config files.
     |
     */
 
@@ -66,7 +66,6 @@ return [
     | %methods%    : The Interface methods
     | %datetime%   : Datetime (Y-m-d H:i:s) of the interface creation
     |
-    |
     */
 
     'stubFile' => base_path('vendor/bsharp/larinterface/src/stubs/SampleInterface'),
@@ -86,8 +85,20 @@ return [
     | after  : MyClassInterface
     | none   : MyClass
     |
-    |
     */
 
     'declaration' => 'after',
+
+    /*
+    |--------------------------------------------------------------------------
+    | Larinterface json cache directory
+    |--------------------------------------------------------------------------
+    |
+    | Larinterface generate a json file that contain a list of all the classes
+    | to watch. Generated using the Larinterface PHP configuration, this file
+    | can be used by gulp to have an up to date liste of classes to watch.
+    |
+    */
+
+    'cache_directory' => storage_path('app'),
 ];
