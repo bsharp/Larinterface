@@ -10,8 +10,6 @@ namespace App\Larinterface\Test\Interfaces;
  */
 interface FirstClassInterface
 {
-    
-
     /**
      * Create a new Artisan console application.
      *

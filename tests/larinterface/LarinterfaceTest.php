@@ -15,7 +15,6 @@ class LarinterfaceTest extends \Orchestra\Testbench\TestCase
      */
     protected function getEnvironmentSetUp($app)
     {
-
         $app['config']->set('larinterface', require __DIR__ . '/../../publish/config/larinterface.php');
 
         // Create test Larinterface configuration

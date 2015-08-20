@@ -10,8 +10,6 @@ namespace App\Larinterface\Test\Interfaces;
  */
 interface ThirdClassInterface
 {
-    
-
     /**
      * Create a new command dispatcher instance.
      *
