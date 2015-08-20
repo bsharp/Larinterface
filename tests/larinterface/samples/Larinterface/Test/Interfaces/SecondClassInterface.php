@@ -8,5 +8,4 @@ namespace App\Larinterface\Test\Interfaces;
  */
 interface SecondClassInterface
 {
-
 }

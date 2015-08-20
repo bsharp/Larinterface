@@ -10,8 +10,6 @@ namespace App\Larinterface\Test\Interfaces;
  */
 interface SecondClassInterface
 {
-    
-
     /**
      * Create a new encrypter instance.
      *
