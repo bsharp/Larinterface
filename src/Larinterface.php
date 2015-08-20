@@ -99,7 +99,7 @@ class Larinterface
             }
 
             foreach ($directories as $directory) {
-                $classes = $this->classFinder->findClasses($directory);
+                $classes = $this->classFinder->findClasses(base_path($directory));
 
                 if (isset($classesArray[$output])) {
                     $classesArray[$output] = array_merge($classesArray[$output], $classes);
