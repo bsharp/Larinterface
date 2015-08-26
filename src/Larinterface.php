@@ -73,11 +73,13 @@ class Larinterface
 
         // Forge classes
         foreach ($conf_classes as $output => $classes) {
-            if (is_numeric($output)) {
+            if (is_numeric($output))
+            {
                 $output = 0;
             }
 
             if (is_string($classes)) {
+                
                 $classes = [$classes];
             }
 
