@@ -15,6 +15,13 @@ To install Larinterface using composer, run this command:
 ```
     composer require bsharp/larinterface
 ```
+#### Setup
+
+After running composer update, open your Laravel config file located at config/app.php and add the following in the $providers array.
+
+```
+    Bsharp\Larinterface\LarinterfaceServiceProvider::class
+```
 
 ### Publish
 
